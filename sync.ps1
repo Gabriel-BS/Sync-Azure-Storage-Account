@@ -21,11 +21,10 @@ $DestStorageContext = New-AzureStorageContext -StorageAccountName $DestStorageAc
 
 $Containers = Get-AzureStorageContainer -Context $SourceStorageContext
 
-
 foreach($Container in $Containers)
 {
     if(($Container.name -eq '$web') -or ($Container.name -eq '$logs')){
-        $ContainerName = ""
+        continue
     } else {
         $ContainerName = $Container.Name
     }
@@ -44,9 +43,15 @@ foreach($Container in $Containers)
     foreach ($Blob in $Blobs)
     {
        $BlobName = $Blob.Name
-       Write-Output "Copying $BlobName from $ContainerName"
-       $BlobCopy = Start-CopyAzureStorageBlob -Context $SourceStorageContext -SrcContainer $ContainerName -SrcBlob $BlobName -DestContext $DestStorageContext -DestContainer $ContainerName -DestBlob $BlobName
-       $BlobCpyAry += $BlobCopy
+
+       if(!(Get-AzureStorageBlob -Context $DestStorageContext -Container $ContainerName | Where-Object {$_.Name -eq $BlobName })){
+           Write-Output "Copying $BlobName from $ContainerName"
+           $BlobCopy = Start-CopyAzureStorageBlob -Context $SourceStorageContext -SrcContainer $ContainerName -SrcBlob $BlobName -DestContext $DestStorageContext -DestContainer $ContainerName -DestBlob $BlobName
+           $BlobCpyAry += $BlobCopy
+       } else {
+            Write-Output "$BlobName Already Exists"
+           continue
+       }
     }
 
     #Check Status
