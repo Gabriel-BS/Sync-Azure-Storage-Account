@@ -5,7 +5,7 @@ param(
 
     [Parameter(Mandatory=$True, Position=1, ValueFromPipeline=$false)]
     [System.String]
-    $SourceStorageKey
+    $SourceStorageKey,
 
     [Parameter(Mandatory=$True, Position=2, ValueFromPipeline=$false)]
     [System.String]
